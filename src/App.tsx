@@ -1,9 +1,10 @@
 // import { Component } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 
 import CardList from "./components/card-list/card-list.component";
 import SearchBox from "./components/search-box/search-box.component";
 import "./App.css";
+import { getData } from "./utils/data.utils";
 
 //represents entire react app
 //written in jsx - js + html
@@ -11,22 +12,38 @@ import "./App.css";
 
 // Functional component - they gets runes and they are done with it
 // Function will rerun every time component needs to be rerendered
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 const App = () => {
   // will run function top to bottom
   // whatever is returned will be UI
 
   // allows to create state in functional env.
   const [searchField, setSearchField] = useState(""); // [value(we want to store), SETvALUE(function)]
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Monster[]>([]);
   const [filteredMonsters, setFilteredMonsters] = useState(monsters);
   // make an api request
   // is a side effect
 
   // if [] is empty, runs on mount
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then((users) => setMonsters(users));
+    // fetch("https://jsonplaceholder.typicode.com/users")
+    //   .then((response) => response.json())
+    //   .then((users) => setMonsters(users));
+
+    const fetchUsers = async () => {
+      const users = await getData<Monster[]>(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      setMonsters(users);
+    };
+
+    fetchUsers();
   }, []);
 
   // to update filtered monsters only if search string or monsters array is changed
@@ -38,7 +55,7 @@ const App = () => {
     setFilteredMonsters(newFilteredMonsters);
   }, [monsters, searchField]);
 
-  const onSearchChange = (event) => {
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLowerCase();
     setSearchField(searchFieldString);
   };
